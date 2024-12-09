@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture Face</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            margin: 0;
+            padding: 0;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"], input[type="email"], select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus, select:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+
+        video, canvas {
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none; /* Hidden until capture is clicked */
+            width: 100%; /* Make video take full width */
+        }
+
+        button {
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2575fc;
+        }
+
+        .form-section {
+            margin-top: 15px;
+        }
+
+        #capturePhoto {
+            display: block;
+            margin: 20px auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Register Your Face</h1>
+    <div class="container">
+        <form id="uploadForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" id="faceData" name="faceData">
+
+            <!-- Form fields -->
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="department">Department</label>
+                <select id="department" name="department" required>
+                    <option value="" disabled selected>Select your department</option>
+                    <option value="HR">HR</option>
+                    <option value="IT">IT</option>
+                    <option value="Finance">Finance</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" name="address" placeholder="Enter your address" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="Enter your phone number" required>
+            </div>
+
+            <!-- Video and canvas -->
+            <div id="videoSection" class="hidden">
+                <video id="video" autoplay></video>
+                <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+            </div>
+
+            <!-- Capture photo button -->
+            <button type="button" id="capturePhoto">Capture Photo</button>
+
+            <!-- Submit button -->
+            <button type="submit" style="margin-top: 20px;">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('capturePhoto');
+        const faceDataInput = document.getElementById('faceData');
+        const videoSection = document.getElementById('videoSection');
+
+        // Access the user's camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+                video.style.display = 'block'; // Ensure the video element is visible
+                video.play(); // Start playing the video
+            })
+            .catch((error) => {
+                console.error('Error accessing the camera: ', error);
+                alert('Could not access the camera. Please check your browser permissions.');
+            });
+
+        // Show video and capture photo
+        captureButton.addEventListener('click', () => {
+            videoSection.classList.remove('hidden'); // Make video section visible
+            video.style.display = 'block'; // Ensure video is displayed
+            captureButton.textContent = "Take Snapshot";
+
+            // Handle snapshot on the second click
+            captureButton.addEventListener('click', () => {
+                const context = canvas.getContext('2d');
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const faceData = canvas.toDataURL('image/png');
+                faceDataInput.value = faceData; // Set the captured image data as input value
+                alert("Photo captured! You can now submit the form.");
+                videoSection.classList.add('hidden');
+                video.style.display = 'none'; // Hide video after capture
+                captureButton.textContent = "Retake Photo";
+            }, { once: true });
+        });
+    </script>
+</body>
+</html>

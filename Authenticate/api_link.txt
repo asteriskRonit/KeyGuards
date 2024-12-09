@@ -1,0 +1,3 @@
+1. http://127.0.0.1:8000/authenticate/api-register-fetch/    (Fetching all the data from the table)
+2. http://127.0.0.1:8000/authenticate/register-face-by-email/  (Fetching the specific data using email)
+3. http://127.0.0.1:8000/authenticate/update-register-face/    (updating the user data using email)

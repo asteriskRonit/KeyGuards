@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Authentication</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+            text-align: center;
+        }
+
+        #webcam-box {
+            display: none;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        button {
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #2575fc;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(1);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <h1>Face Authentication</h1>
+    <div class="container">
+        <button onclick="startWebcam()">Start Authentication</button>
+        <div id="webcam-box">
+            <video id="video" autoplay></video>
+            <div class="button-container">
+                <button onclick="captureAndAuthenticate()">Capture & Authenticate</button>
+                <button onclick="stopWebcam()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let videoStream = null;
+
+        async function startWebcam() {
+            // Access the webcam
+            const webcamBox = document.getElementById('webcam-box');
+            const video = document.getElementById('video');
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = videoStream;
+                webcamBox.style.display = 'block';
+                video.play();
+            } catch (err) {
+                alert('Unable to access the webcam. Please allow camera permissions.');
+                console.error(err);
+            }
+        }
+
+        async function captureAndAuthenticate() {
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            // Capture current frame
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to base64
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            // Send the captured image to the server
+            const response = await fetch('/authenticate/authenticate-face/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', // CSRF token for Django
+                },
+                body: JSON.stringify({ image: imageData }),
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert(`Face recognized: ${result.name}`);
+            } else {
+                alert(result.message);
+            }
+
+            stopWebcam();
+        }
+
+        function stopWebcam() {
+            const video = document.getElementById('video');
+            const webcamBox = document.getElementById('webcam-box');
+            if (videoStream) {
+                const tracks = videoStream.getTracks();
+                tracks.forEach((track) => track.stop());
+                videoStream = null;
+            }
+            webcamBox.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

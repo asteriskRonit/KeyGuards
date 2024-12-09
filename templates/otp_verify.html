@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        /* Global Styles */
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #eef2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        /* Container Style */
+        
+        .container {
+            background-color: #ffffff;
+            padding: 40px 50px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            transform: translateY(-50px);
+            transition: all 0.3s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(0);
+        }
+        /* Header Style */
+        
+        h2 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        /* Input Group */
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            font-size: 14px;
+            color: #666;
+            text-align: left;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            color: #333;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+        }
+        /* Button Styles */
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        /* Message Styling */
+        
+        .message {
+            margin-top: 20px;
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        .message.success {
+            color: green;
+        }
+        
+        .message ul {
+            padding: 0;
+            list-style-type: none;
+            font-size: 14px;
+        }
+        
+        .message ul li {
+            margin: 10px 0;
+        }
+        /* Responsive Design */
+        
+        @media (max-width: 500px) {
+            .container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Enter OTP</h2>
+
+        <form method="post" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            <div class="input-group">
+                <label for="otp">OTP</label>
+                <input type="text" name="otp" id="otp" placeholder="Enter OTP" required>
+            </div>
+
+            <button type="submit">Verify OTP</button>
+        </form>
+
+        {% if messages %}
+        <div class="message">
+            <ul>
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

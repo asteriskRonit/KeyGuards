@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create User</title>
+</head>
+<body>
+    <h1>Create User</h1>
+    <form id="createUserForm" onsubmit="event.preventDefault(); submitData();">
+        <!-- Add CSRF token as a hidden input in your form -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+
+        <label for="serial">Serial:</label>
+        <input type="number" id="serial" name="serial" required><br><br>
+    
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+    
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+    
+        <label for="department_id">Department ID:</label>
+        <input type="number" id="department_id" name="department_id" required><br><br>
+    
+        <label for="access">Access:</label>
+        <select id="access" name="access" required>
+            <option value="true">True</option>
+            <option value="false">False</option>
+        </select><br><br>
+    
+        <button type="submit">Submit</button>
+    </form>
+    
+    <p id="responseMessage"></p>
+    
+
+    <p id="responseMessage"></p>
+
+    <p id="responseMessage"></p>
+    <h3>Submitted Data:</h3>
+    <pre id="submittedData"></pre>
+
+    <script>
+        async function submitData() {
+            console.log("Submit Data function triggered");
+        
+            const serial = document.getElementById('serial').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const department_id = document.getElementById('department_id').value;
+            const access = document.getElementById('access').value === "true";
+        
+            const data = {
+                serial: parseInt(serial),
+                name: name,
+                email: email,
+                department_id: parseInt(department_id),
+                access: access
+            };
+
+            document.getElementById('submittedData').innerText = JSON.stringify(data, null, 2);
+        
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                const response = await fetch('/authenticate/api/create-user/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+        
+                if (response.ok) {
+                    document.getElementById('responseMessage').innerText = `Success: ${result.message}`;
+                } else {
+                    document.getElementById('responseMessage').innerText = `Error: ${result.error || 'An error occurred'}`;
+                }
+            } catch (error) {
+                console.error("Error in fetch:", error);
+                document.getElementById('responseMessage').innerText = `Error: ${error.message}`;
+            }
+        }
+        
+            
+    </script>
+</body>
+</html>

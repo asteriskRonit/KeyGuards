@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Department</title>
+</head>
+<body>
+    <h1>Create Department</h1>
+    <form id="createDepartmentForm">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+        <label for="department_id">Department ID:</label>
+        <input type="number" id="department_id" name="department_id" required><br><br>
+
+        <label for="department_name">Department Name:</label>
+        <input type="text" id="department_name" name="department_name" required><br><br>
+
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key" required><br><br>
+
+        <button type="button" onclick="submitDepartmentData()">Submit</button>
+    </form>
+
+    <p id="responseMessage"></p>
+
+    <script>
+        async function submitDepartmentData() {
+            // Get form values
+            const department_id = document.getElementById('department_id').value;
+            const department_name = document.getElementById('department_name').value;
+            const key = document.getElementById('key').value;
+
+            // Create JSON payload
+            const data = {
+                department_id: parseInt(department_id),
+                department_name: department_name,
+                key: key
+            };
+
+            try {
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                // Send POST request to the API
+                const response = await fetch('http://127.0.0.1:8000/authenticate/api/create-department/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                // Display response message
+                if (response.ok) {
+                    document.getElementById('responseMessage').innerText = 
+                        `Success: Department created! ${JSON.stringify(result)}`;
+                } else {
+                    document.getElementById('responseMessage').innerText = 
+                        `Error: ${JSON.stringify(result)}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('responseMessage').innerText = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
